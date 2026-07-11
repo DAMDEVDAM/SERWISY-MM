@@ -1,0 +1,725 @@
+<!-- Lista serwisowa BRILL AV MEDIA — Lato 2026 (v2: edytowalna + podpisy techników) -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<div id="app"></div>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#e9e6de;--panel:#f7f5f0;--card:#ffffff;--ink:#191713;--ink-soft:#5c574d;
+    --line:#d9d4c7;--amber:#e6a10a;--amber-deep:#c4860a;--done:#2f7d4f;--red:#c14a3a;--orange:#dd8a1f;
+    --stripe:#1c1a16;--shadow:0 1px 2px rgba(25,23,19,.06),0 6px 20px rgba(25,23,19,.05);
+  }
+  *{box-sizing:border-box}
+  #app{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);
+    min-height:100vh;padding:20px 14px 90px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto}
+
+  .head{background:var(--stripe);color:#f7f5f0;border-radius:14px;padding:22px 22px 20px;
+    position:relative;overflow:hidden;box-shadow:var(--shadow)}
+  .head::before{content:"";position:absolute;top:0;left:0;right:0;height:8px;
+    background:repeating-linear-gradient(-45deg,var(--amber) 0 16px,#1c1a16 16px 32px)}
+  .eyebrow{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--amber);margin:10px 0 4px}
+  .head h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(28px,6vw,44px);
+    line-height:1;letter-spacing:.01em;margin:0;text-transform:uppercase}
+  .head .sub{color:#c9c4b8;font-size:13px;margin-top:8px;max-width:640px}
+  .conn{display:inline-block;margin-top:10px;font-family:'Roboto Mono',monospace;font-size:11px;
+    letter-spacing:.03em;padding:4px 10px;border-radius:99px}
+  .conn.ok{background:#173a26;color:#7fdca6;border:1px solid #275e40}
+  .conn.warn{background:#3a2f17;color:#f0c469;border:1px solid #5e4a27}
+
+  .whoami{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .whoami label{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--amber)}
+  .whoami input{background:#2a2721;border:1px solid #46413a;color:#fff;font:inherit;font-size:14px;
+    padding:8px 12px;border-radius:9px;min-width:200px;outline:0}
+  .whoami input:focus{border-color:var(--amber)}
+
+  .progress-row{display:flex;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+  .bar{flex:1;min-width:180px;height:12px;background:#332f28;border-radius:99px;overflow:hidden}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),#f4c542);transition:width .4s}
+  .bar.full>span{background:linear-gradient(90deg,#2f7d4f,#49a86b)}
+  .pct{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1}
+  .count{font-family:'Roboto Mono',monospace;font-size:12px;color:#c9c4b8}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0 16px}
+  .search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:var(--card);
+    border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+  .search input{border:0;outline:0;background:transparent;font:inherit;font-size:14px;width:100%;color:var(--ink)}
+  .search svg{flex:none;color:var(--ink-soft)}
+  .filters{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px}
+  .filters button{border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--ink-soft);
+    padding:6px 12px;border-radius:7px;cursor:pointer;white-space:nowrap}
+  .filters button.active{background:var(--stripe);color:#fff}
+  .owner-filter{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;
+    font-weight:600;padding:9px 12px;border-radius:10px;cursor:pointer;outline:0;max-width:170px}
+  .owner-filter:focus{border-color:var(--amber)}
+  .ghost-btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;
+    font-weight:600;padding:9px 14px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .ghost-btn:hover{border-color:var(--amber);color:var(--amber-deep)}
+
+  .group{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;
+    box-shadow:var(--shadow);overflow:hidden}
+  .group.hidden{display:none}
+  .group-head{display:flex;align-items:center;gap:12px;padding:14px 16px;user-select:none}
+  .idx{font-family:'Roboto Mono',monospace;font-size:12px;color:#fff;background:var(--stripe);
+    border-radius:6px;padding:4px 7px;flex:none}
+  .group-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:21px;text-transform:uppercase;
+    letter-spacing:.01em;flex:1;line-height:1.15;outline:0;border-radius:5px;padding:1px 4px;margin:-1px -4px}
+  .group-title:focus{background:var(--panel);box-shadow:0 0 0 2px var(--amber)}
+  .group-meta{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--ink-soft);flex:none}
+  .group-meta.done{color:var(--done)}
+  .icon-btn{flex:none;border:0;background:none;cursor:pointer;color:var(--ink-soft);padding:5px;border-radius:7px;
+    display:grid;place-items:center}
+  .icon-btn:hover{background:var(--panel)}
+  .icon-btn.danger:hover{background:#f7e6e2;color:var(--red)}
+  .chev{transition:transform .2s}
+  .group.collapsed .chev{transform:rotate(-90deg)}
+  .group.collapsed .tasks{display:none}
+  .group.alldone .group-title{color:var(--ink-soft)}
+  .group.alldone .idx{background:var(--done)}
+
+  .tasks{border-top:1px solid var(--line)}
+  .task{padding:12px 14px 12px 12px;border-bottom:1px solid #efece4;display:flex;gap:11px;align-items:flex-start;
+    border-left:4px solid transparent;transition:background .2s,border-color .2s}
+  .task:last-child{border-bottom:0}
+  .task.t-hidden{display:none}
+  .task.st-green{background:#edf6ef;border-left-color:var(--done)}
+  .task.st-orange{background:#fdf2e2;border-left-color:var(--orange)}
+  .task.st-red{background:#fbece9;border-left-color:var(--red)}
+  .check{flex:none;width:24px;height:24px;border:2px solid #bdb7a8;border-radius:7px;background:#fff;cursor:pointer;
+    margin-top:1px;display:grid;place-items:center;transition:all .15s}
+  .check svg{opacity:0;transform:scale(.6);transition:all .15s;color:#fff}
+  .task.done .check{background:var(--done);border-color:var(--done)}
+  .task.done .check svg{opacity:1;transform:scale(1)}
+  .task-body{flex:1;min-width:0}
+  .task-text{font-size:14.5px;font-weight:500;color:var(--ink);word-break:break-word;outline:0;
+    border-radius:5px;padding:1px 4px;margin:-1px -4px}
+  .task-text:focus{background:var(--panel);box-shadow:0 0 0 2px var(--amber)}
+  .task.done .task-text{color:var(--ink-soft)}
+  .task.done .task-text:not(:focus){text-decoration:line-through;text-decoration-color:#c3bdb0}
+  .task-tools{display:flex;align-items:center;gap:14px;margin-top:7px;flex-wrap:wrap}
+  .note-toggle{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;cursor:pointer;
+    font:inherit;font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+  .note-toggle:hover{color:var(--amber-deep)}
+  .note-toggle.has-note{color:var(--amber-deep)}
+  .owner{display:inline-flex;align-items:center;gap:5px;background:var(--panel);border:1px solid var(--line);
+    border-radius:99px;padding:3px 10px 3px 9px}
+  .owner-ic{display:inline-flex;color:var(--ink-soft)}
+  .owner-input{border:0;outline:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;
+    color:var(--ink);width:118px;padding:2px 0}
+  .owner-input::placeholder{color:#a49d8e;font-weight:500}
+  .owner.assigned{background:#eef2fb;border-color:#c7d3ec}
+  .owner.assigned .owner-ic{color:#3b5da8}
+  .owner.assigned .owner-input{color:#2c467d}
+  .note-dot{width:7px;height:7px;border-radius:99px;background:var(--amber);display:none}
+  .note-toggle.has-note .note-dot{display:inline-block}
+  .meta{font-family:'Roboto Mono',monospace;font-size:11px;color:#9a9384;display:flex;gap:10px;flex-wrap:wrap}
+  .meta .done-by{color:var(--done)}
+  .meta .note-by{color:var(--amber-deep)}
+  .del-task{margin-left:auto}
+
+  .note-wrap{margin-top:9px;display:none}
+  .note-wrap.open{display:block}
+  .note-wrap textarea{width:100%;min-height:64px;resize:vertical;border:1px solid var(--line);border-radius:9px;
+    padding:9px 11px;font:inherit;font-size:13.5px;color:var(--ink);background:var(--panel);outline:0}
+  .note-wrap textarea:focus{border-color:var(--amber);background:#fff}
+  .note-hint{font-size:11.5px;color:#9a9384;margin-top:4px}
+
+  .add-row{padding:10px 14px;display:flex;gap:8px;background:var(--panel)}
+  .add-row input{flex:1;border:1px solid var(--line);border-radius:9px;padding:8px 11px;font:inherit;
+    font-size:13.5px;outline:0;background:#fff}
+  .add-row input:focus{border-color:var(--amber)}
+  .add-row button{border:0;background:var(--stripe);color:#fff;font:inherit;font-weight:600;font-size:13px;
+    padding:8px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .add-row button:hover{background:#000}
+
+  .add-group{width:100%;border:1.5px dashed var(--line);background:var(--card);color:var(--ink-soft);
+    font:inherit;font-weight:600;font-size:14px;padding:14px;border-radius:14px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .add-group:hover{border-color:var(--amber);color:var(--amber-deep)}
+
+  .foot{text-align:center;margin-top:26px;color:var(--ink-soft);font-size:12px}
+  .foot a{color:var(--amber-deep);cursor:pointer;text-decoration:underline}
+  .empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:14px}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(25,23,19,.55);display:flex;align-items:center;
+    justify-content:center;padding:20px;z-index:50}
+  .modal-overlay[hidden]{display:none}
+  .modal{background:var(--card);border-radius:16px;max-width:420px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;text-transform:uppercase;
+    letter-spacing:.01em;margin-bottom:6px}
+  .modal-task{font-size:13px;color:var(--ink-soft);background:var(--panel);border-radius:9px;padding:9px 11px;
+    margin-bottom:14px;border-left:3px solid var(--amber)}
+  .modal input{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font:inherit;font-size:15px;
+    outline:0;background:var(--panel)}
+  .modal input:focus{border-color:var(--amber);background:#fff}
+  .modal-btns{display:flex;gap:9px;margin-top:16px;justify-content:flex-end}
+  .modal-btns button{font:inherit;font-weight:600;font-size:14px;padding:10px 18px;border-radius:10px;cursor:pointer;border:0}
+  .modal-cancel{background:var(--panel);color:var(--ink-soft);border:1px solid var(--line)!important}
+  .modal-ok{background:var(--done);color:#fff}
+  .modal-ok:hover{background:#276b43}
+  .modal-ok:disabled{background:#c9c4b8;cursor:not-allowed}
+  .modal-warn{background:#fdf2e2;border:1px solid #f0d09a;border-left:3px solid var(--orange);
+    border-radius:9px;padding:10px 12px;margin-bottom:14px}
+  .warn-line{font-size:13px;color:#8a5b12;font-weight:600;margin-bottom:8px}
+  .force-label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;font-weight:600}
+  .force-label input{width:17px;height:17px;accent-color:var(--orange);cursor:pointer}
+
+  @media (max-width:640px){
+    #app{padding:14px 10px 96px}
+    .head{padding:18px 15px 15px}
+    .head .sub{font-size:12.5px}
+    .progress-row{gap:10px}
+    .pct{font-size:22px}
+
+    .toolbar{gap:8px}
+    .search{flex:1 1 100%;min-width:0}
+    .filters{flex:1 1 100%}
+    .filters button{flex:1}
+    .owner-filter{flex:1 1 100%;max-width:none}
+    .ghost-btn{flex:1 1 30%;justify-content:center}
+    /* pola min. 16px => iOS nie przybliża ekranu przy edycji */
+    .search input,.modal input,.note-wrap textarea,.add-row input{font-size:16px}
+
+    .group-head{padding:12px 12px;gap:9px}
+    .group-title{font-size:19px}
+    .task{padding:11px 12px 11px 10px;gap:10px}
+    .task-text{font-size:15px}
+    .task-tools{gap:10px}
+    .owner{flex:1 1 100%}
+    .owner-input{flex:1;width:auto}
+    .meta{font-size:10.5px;gap:8px}
+    .add-row{flex-wrap:wrap}
+    .add-row input{flex:1 1 100%}
+    .add-row button{flex:1 1 100%;justify-content:center}
+
+    .modal{padding:18px;border-radius:14px}
+    .modal-title{font-size:21px}
+    .modal-btns button{flex:1}
+  }
+
+  @media print{
+    #app{background:#fff;padding:0}
+    .toolbar,.whoami,.chev,.note-toggle,.foot,.head::before,.add-row,.add-group,.icon-btn,.del-task{display:none!important}
+    .group,.head{box-shadow:none;border:1px solid #ccc;break-inside:avoid}
+    .head{background:#fff;color:#000}.head h1,.eyebrow,.head .sub,.pct,.count{color:#000}
+    .note-wrap{display:block!important}.group.collapsed .tasks{display:block!important}
+  }
+</style>
+
+<!-- Firebase (baza danych czasu rzeczywistego) — do współdzielenia listy między osobami -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+
+<script>
+(function(){
+  // ===================================================================
+  //  KONFIGURACJA FIREBASE — wklej dane ze swojego projektu (krok 2 w instrukcji).
+  //  Dopóki apiKey zawiera "WKLEJ", strona działa w trybie LOKALNYM
+  //  (zapis tylko na tym urządzeniu, bez współdzielenia).
+  // ===================================================================
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyA48xWCRO8RK75tuHhASL9J6Hl5nOVXpj0",
+    authDomain: "serwisy-multimedia-bavm-dc88e.firebaseapp.com",
+    databaseURL: "https://serwisy-multimedia-bavm-dc88e-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "serwisy-multimedia-bavm-dc88e"
+  };
+  const DB_PATH = 'serwis_bavm_2026';   // gałąź w bazie; wszyscy z tym samym adresem widzą tę samą listę
+
+  let dbRef=null, useCloud=false, lastSaved='', pendingRemote=null;
+  function initStorage(){
+    try{
+      if(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('WKLEJ')===-1 && window.firebase){
+        firebase.initializeApp(FIREBASE_CONFIG);
+        dbRef = firebase.database().ref(DB_PATH);
+        useCloud = true;
+      }
+    }catch(e){ useCloud=false; }
+  }
+
+  const DEFAULTS=[
+    ["AQUILON RS3 WA",["Wyczyścić filtr frontowy — instrukcja na grupie Multimedia","Odkurzyć/umyć szuflady, dokręcić śruby itd."]],
+    ["BARCO S3",["Wyjąć karty i przedmuchać, wyczyścić szuflady, sprawdzić śruby itd."]],
+    ["PIXERA 1WA",["Wyjąć i przedmuchać komputer — spisać ilość przejściówek i zanotować — wysłać do Damiana","Odkurzyć/umyć szuflady, dokręcić śruby itd."]],
+    ["PIXERA 2WA",["Nie trzeba czyścić komputera (robione ostatnio). Spisać listę przejściówek i wysłać do Damiana","Odkurzyć/umyć szuflady, dokręcić śruby itd."]],
+    ["PIXERA 3WA",["Wyjąć i przedmuchać komputer — spisać ilość przejściówek i zanotować — wysłać do Damiana","Odkurzyć/umyć szuflady, dokręcić śruby itd."]],
+    ["HIRENDER 1WA",["Wyjąć i przedmuchać komputer — spisać ilość przejściówek i zanotować — wysłać do Damiana","Odkurzyć/umyć szuflady, dokręcić śruby itd."]],
+    ["CIASTKO DO DIODY",["Przejrzeć i skompletować ciastka do diody, uzupełnić aliskafy, odseparować uszkodzone / niekompletne itd."]],
+    ["LED POSTERY",["Sprawdzić kompletność: śruby, przyssawka, klucz z ogranicznikiem, antena; sprawdzić czy nie ma uszkodzeń","Zresetować do ustawień fabrycznych — NIE ustawiać hasła (hasło pozostaje tylko fabryczne)"]],
+    ["STATYWY WYSOKIE DO TV",["Znaleźć i odkręcić niepomalowane podstawy i przekazać magazynierom do malowania proszkowego"]],
+    ["KUDUX",["Przeliczyć faktyczną ilość każdej długości, oznaczyć kejsy ilością, uszkodzone odłożyć na serwis","Przedmuchać kontrolery, sprawdzić mocowania / dokręcić gdzie brakuje"]],
+    ["BĘBNY MPO",["Sprawdzić miotły (ilość), sprawdzić przeloty, zacisnąć linki, oznaczyć na stałe końcówkę numerem bębna","Poprosić Wojtka o wydruk numerów na naklejkach samolaminujących (np. X12 MPO 1, X12 MPO 2 itd.); tak samo bębny X12 bez odłączanej końcówki"]],
+    ["ŚWIATŁOWODY SC",["Sprawdzić przeloty, oznaczyć uszkodzone, opisać na obudowie bębna ilość sprawnych"]],
+    ["VMIXY PRO",["Sprawdzić poprawność oznaczeń na laptopie oraz na kejsie"]],
+    ["PILOTY MICRO I MASTER CUE",["Sprawdzić kompletność i uzupełnić braki"]],
+    ["DIODA MVPRO I CF",["Wyczyścić/umyć panele, zaświecić na nie światłem żarowym lub ledowym, szukać lśniących punktów","Sprawdzić bad pixele"]],
+    ["KONWERTERY DVI",["Przejrzeć wszystkie przejściówki DVI/HDMI i konwertery optyczne DVI pod kątem wygiętych pinów i przedziałów gniazda. Oddać na serwis uszkodzone przejściówki (wygięty pin) oraz piny do wyprostowania"]],
+    ["UCHWYTY DO PROJEKTORÓW",["Sprawdzić kompletność śrub oraz działanie uchwytu, sprawdzić czy nie ma pęknięć i czy wszystko jest dokręcone"]],
+    ["PROJEKTORY",["Przeczyścić filtry — wszystkie modele. Sprawdzić ramy do projektorów pod kątem braków pinów do stackowania oraz uszkodzeń ramy (pęknięcia itd.)"]],
+    ["OBIEKTYWY DO PROJEKTORÓW",["Sprawdzić poprawność działania (zoom / focus), wyczyścić szkło"]],
+    ["MIEJSCE NA BEAMY DO KAŻDEJ DIODY",["Zrobić na antresoli miejsce na beamy do każdej diody. Opisać na półce model diody, wydrukować zdjęcie beamów (gdzie odłożyć). Lista elementów i długości przy każdym rodzaju beamów. Przewidzieć miejsce na akcesoria (śruby, blaszki, oczka). Sprawdzić kompletność każdego beamu — czy jest tyle oczek, aby podwiesić diodę itd."]],
+    ["INNE / OPROGRAMOWANIE",["Zaktualizować vMix HD do wersji 29…"]]
+  ];
+
+  let data={version:2,currentUser:'',groups:[]};
+  let filter='all',query='',ownerFilter='';
+  const ui={collapsed:{},noteOpen:{}};
+
+  const uid=()=> 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  function seed(){
+    data.groups=DEFAULTS.map(([name,tasks])=>({
+      id:uid(),name,
+      tasks:tasks.map(text=>({id:uid(),text,owner:'',created:now(),done:false,doneBy:'',doneAt:'',note:'',noteBy:'',lastEdit:''}))
+    }));
+  }
+
+  function migrate(){
+    if(!data||typeof data!=='object'){data={version:2,currentUser:'',groups:[]};}
+    if(!data.groups) data.groups=[];
+    data.groups.forEach(g=>{ if(!g.tasks)g.tasks=[]; g.tasks.forEach(t=>{
+      if(!t.created) t.created=t.lastEdit||now();
+      if(t.owner===undefined) t.owner='';
+    });});
+  }
+  function lsGet(){try{return localStorage.getItem(DB_PATH);}catch(e){return null;}}
+  function lsSet(v){try{localStorage.setItem(DB_PATH,v);}catch(e){}}
+
+  async function load(){
+    try{
+      if(useCloud){
+        const snap=await dbRef.once('value');
+        if(snap.exists()){ data=snap.val(); } else { seed(); await save(); }
+      }else{
+        const v=lsGet();
+        if(v){ data=JSON.parse(v); } else { seed(); await save(); }
+      }
+    }catch(e){ if(!data.groups||!data.groups.length) seed(); }
+    if(!data.groups||!data.groups.length) seed();
+    migrate();
+  }
+
+  let saveTimer=null;
+  function save(){
+    return new Promise(res=>{
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(()=>{
+        const payload=JSON.stringify(data); lastSaved=payload;
+        try{
+          if(useCloud){ dbRef.set(data).then(()=>res(),()=>res()); }
+          else { lsSet(payload); res(); }
+        }catch(e){ res(); }
+      },200);
+    });
+  }
+
+  // Synchronizacja na żywo między osobami. Jeśli ktoś aktualnie coś edytuje,
+  // przychodzącą zmianę wstrzymujemy do zakończenia edycji (żeby nie „wyrwać” tekstu).
+  function startSync(){
+    if(!useCloud) return;
+    dbRef.on('value', snap=>{
+      if(!snap.exists()) return;
+      const incoming=snap.val();
+      const s=JSON.stringify(incoming);
+      if(s===lastSaved) return;               // echo naszego własnego zapisu
+      const ae=document.activeElement;
+      const editing = ae && (ae.tagName==='TEXTAREA'||ae.tagName==='INPUT'||ae.isContentEditable);
+      if(editing){ pendingRemote=incoming; return; }
+      data=incoming; migrate(); render();
+    });
+    document.addEventListener('focusout',()=>{
+      setTimeout(()=>{
+        const ae=document.activeElement;
+        const editing = ae && (ae.tagName==='TEXTAREA'||ae.tagName==='INPUT'||ae.isContentEditable);
+        if(!editing && pendingRemote){ data=pendingRemote; pendingRemote=null; migrate(); render(); }
+      },60);
+    });
+  }
+  function updateConnPill(){
+    const el=document.getElementById('conn'); if(!el) return;
+    if(useCloud){ el.textContent='☁ Połączono — lista wspólna'; el.className='conn ok'; }
+    else { el.textContent='⚠ Tryb lokalny (zapis tylko na tym urządzeniu) — uzupełnij konfigurację Firebase'; el.className='conn warn'; }
+  }
+
+  function now(){const d=new Date(),p=n=>String(n).padStart(2,'0');
+    return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());}
+  function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+  const ICONS={
+    check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    chev:'<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>',
+    search:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    note:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>',
+    print:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+    dl:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    trash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    plus:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    user:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+  };
+
+  // zielony = zamknięte; pomarańczowy = ma uwagi i nie zamknięte (zablokowane); czerwony = do zrobienia
+  function taskState(t){
+    if(t.done) return 'green';
+    if(t.note&&t.note.trim()) return 'orange';
+    return 'red';
+  }
+  function totals(){let d=0,a=0;data.groups.forEach(g=>g.tasks.forEach(t=>{a++;if(t.done)d++;}));return{d,a};}
+  function findTask(id){for(const g of data.groups){const t=g.tasks.find(x=>x.id===id);if(t)return{g,t};}return null;}
+
+  function buildStatic(){
+    document.getElementById('app').innerHTML=`
+    <div class="wrap">
+      <header class="head">
+        <div class="eyebrow">Brill AV Media</div>
+        <h1>Serwis Multimedia BAVM&nbsp;2026</h1>
+        <div class="conn" id="conn"></div>
+        <div class="sub">Odhaczaj zadania, dopisuj uwagi i przypisuj osoby odpowiedzialne. Przy zamykaniu podajesz swoje imię; daty wpłynięcia i zakończenia ustawiają się same. 🟢 zielony = zamknięte, 🟠 pomarańczowy = ma uwagi (zablokowane do zamknięcia), 🔴 czerwony = do zrobienia. Zadania z uwagami można zamknąć tylko przez „Zamknij mimo uwag”. Lista jest wspólna dla wszystkich.</div>
+        <div class="progress-row">
+          <div class="pct" id="pct">0%</div>
+          <div class="bar" id="bar"><span></span></div>
+          <div class="count" id="count">0 / 0</div>
+        </div>
+      </header>
+
+      <div class="toolbar">
+        <label class="search">${ICONS.search}<input id="q" type="text" placeholder="Szukaj urządzenia lub zadania…" autocomplete="off"></label>
+        <div class="filters" id="filters">
+          <button data-f="all" class="active">Wszystkie</button>
+          <button data-f="todo">Do zrobienia</button>
+          <button data-f="done">Zrobione</button>
+        </div>
+        <select id="owner-filter" class="owner-filter"><option value="">Wszystkie osoby</option></select>
+        <button class="ghost-btn" id="btn-print">${ICONS.print} Drukuj / PDF</button>
+        <button class="ghost-btn" id="btn-txt">${ICONS.dl} TXT</button>
+        <button class="ghost-btn" id="btn-csv">${ICONS.dl} CSV</button>
+      </div>
+
+      <div id="list"></div>
+
+      <div class="foot">
+        <span id="foot-count"></span> &bull;
+        <a id="btn-reset">Przywróć oryginalną listę</a>
+      </div>
+
+      <div class="modal-overlay" id="modal" hidden>
+        <div class="modal">
+          <div class="modal-title" id="modal-title">Zamknięcie zadania</div>
+          <div class="modal-task" id="modal-task"></div>
+          <div class="modal-warn" id="modal-warn" hidden>
+            <div class="warn-line">⚠ To zadanie ma uwagi — domyślnie nie można go zamknąć.</div>
+            <label class="force-label"><input type="checkbox" id="modal-force"> Zamknij mimo uwag</label>
+          </div>
+          <input id="modal-name" type="text" placeholder="Wpisz swoje imię…" autocomplete="off">
+          <div class="modal-btns">
+            <button class="modal-cancel" id="modal-cancel">Anuluj</button>
+            <button class="modal-ok" id="modal-ok">Zamknij zadanie</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+    document.getElementById('q').addEventListener('input',e=>{query=e.target.value.toLowerCase().trim();applyFilter();});
+    document.getElementById('filters').addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;filter=b.dataset.f;
+      [...document.querySelectorAll('#filters button')].forEach(x=>x.classList.toggle('active',x===b));applyFilter();
+    });
+    document.getElementById('btn-print').addEventListener('click',()=>window.print());
+    document.getElementById('owner-filter').addEventListener('change',e=>{ownerFilter=e.target.value;applyFilter();});
+    document.getElementById('btn-txt').addEventListener('click',exportTxt);
+    document.getElementById('btn-csv').addEventListener('click',exportCsv);
+    document.getElementById('btn-reset').addEventListener('click',resetAll);
+
+    // modal (podpis + ewentualne wymuszenie zamknięcia mimo uwag)
+    const ov=document.getElementById('modal'),nm=document.getElementById('modal-name'),
+          force=document.getElementById('modal-force'),warn=document.getElementById('modal-warn'),
+          ok=document.getElementById('modal-ok');
+    function refreshOk(){
+      const needForce = !warn.hidden && !force.checked;
+      const needName = modalCfg.requireName && nm.value.trim()==='';
+      ok.disabled = needForce || needName;
+    }
+    function confirmModal(){ if(ok.disabled) return; closeModal({name:nm.value.trim()}); }
+    force.onchange=refreshOk;
+    nm.oninput=refreshOk;
+    document.getElementById('modal-cancel').onclick=()=>closeModal(null);
+    ok.onclick=confirmModal;
+    ov.onclick=e=>{if(e.target===ov)closeModal(null);};
+    nm.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();confirmModal();}
+      if(e.key==='Escape'){e.preventDefault();closeModal(null);}};
+    ov._refreshOk=refreshOk;
+  }
+
+  let modalResolve=null, modalCfg={requireName:false};
+  // Uniwersalne okno podpisu. Zwraca {name} po zatwierdzeniu, albo null przy anulowaniu.
+  function openModal({title,taskText,okLabel,showWarn,requireName}){
+    return new Promise(res=>{
+      modalResolve=res;
+      modalCfg={requireName:!!requireName};
+      const ov=document.getElementById('modal'),nm=document.getElementById('modal-name'),
+            force=document.getElementById('modal-force'),warn=document.getElementById('modal-warn');
+      document.getElementById('modal-title').textContent=title;
+      document.getElementById('modal-task').textContent=taskText;
+      document.getElementById('modal-ok').textContent=okLabel;
+      warn.hidden=!showWarn;
+      force.checked=false;
+      nm.value=data.currentUser||'';
+      ov.hidden=false;
+      if(ov._refreshOk) ov._refreshOk();
+      setTimeout(()=>{nm.focus();nm.select();},30);
+    });
+  }
+  // Zamknięcie zadania (z ostrzeżeniem, jeśli są uwagi). Wymaga imienia.
+  function openCloseModal(t){
+    return openModal({title:'Zamknięcie zadania',taskText:t.text,okLabel:'Zamknij zadanie',
+      showWarn:!!(t.note&&t.note.trim()),requireName:true});
+  }
+  // Podpis przy dodawaniu uwagi. Wymaga imienia.
+  function openNoteModal(t){
+    return openModal({title:'Kto zgłasza uwagę?',taskText:t.text,okLabel:'Zapisz i podpisz uwagę',
+      showWarn:false,requireName:true});
+  }
+  function closeModal(val){
+    document.getElementById('modal').hidden=true;
+    const r=modalResolve;modalResolve=null;if(r)r(val);
+  }
+
+  function taskHTML(t){
+    const meta=[];
+    if(t.created) meta.push(`<span>wpłynęło: ${esc(t.created)}</span>`);
+    if(t.done) meta.push(`<span class="done-by">✓ zakończono: ${esc(t.doneAt||'—')} · ${esc(t.doneBy||'—')}${(t.note&&t.note.trim())?' · zamknięte mimo uwag':''}</span>`);
+    if(t.note&&t.note.trim()) meta.push(`<span class="note-by">✎ uwaga: ${esc(t.noteBy||'—')}</span>`);
+    if(t.lastEdit) meta.push(`<span>ost. wpis: ${esc(t.lastEdit)}</span>`);
+    return `
+    <div class="task ${t.done?'done':''} st-${taskState(t)}" data-id="${t.id}">
+      <div class="check" role="checkbox" tabindex="0" aria-checked="${t.done}">${ICONS.check}</div>
+      <div class="task-body">
+        <div class="task-text" contenteditable="true" spellcheck="false">${esc(t.text)}</div>
+        <div class="task-tools">
+          <label class="owner ${t.owner?'assigned':''}"><span class="owner-ic">${ICONS.user}</span><input class="owner-input" type="text" placeholder="Przypisz osobę…" value="${esc(t.owner||'')}"></label>
+          <button class="note-toggle ${t.note&&t.note.trim()?'has-note':''}">${ICONS.note}<span>${t.note&&t.note.trim()?'Uwaga / raport':'Dodaj uwagę / raport'}</span><span class="note-dot"></span></button>
+          <button class="icon-btn danger del-task" title="Usuń zadanie">${ICONS.trash}</button>
+        </div>
+        <div class="meta">${meta.join('')}</div>
+        <div class="note-wrap ${ui.noteOpen[t.id]?'open':''}">
+          <textarea placeholder="Wpisz uwagę, wynik kontroli lub raport…">${esc(t.note)}</textarea>
+          <div class="note-hint">Uwaga jest podpisana imieniem podanym przy jej dodaniu. Zapisuje się automatycznie.</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function groupHTML(g,i){
+    let d=0;g.tasks.forEach(t=>{if(t.done)d++;});
+    const all=g.tasks.length,alldone=all>0&&d===all;
+    const num=String(i+1).padStart(2,'0');
+    return `
+    <section class="group ${ui.collapsed[g.id]?'collapsed':''} ${alldone?'alldone':''}" data-g="${g.id}">
+      <div class="group-head">
+        <span class="idx">${num}</span>
+        <span class="group-title" contenteditable="true" spellcheck="false">${esc(g.name)}</span>
+        <span class="group-meta ${alldone?'done':''}">${d}/${all}</span>
+        <button class="icon-btn toggle-group" title="Zwiń / rozwiń">${ICONS.chev}</button>
+        <button class="icon-btn danger del-group" title="Usuń grupę">${ICONS.trash}</button>
+      </div>
+      <div class="tasks">${g.tasks.map(taskHTML).join('')}
+        <div class="add-row">
+          <input class="add-task-input" type="text" placeholder="Nowe zadanie w tej grupie…">
+          <button class="add-task-btn">${ICONS.plus} Dodaj</button>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function render(){
+    const list=document.getElementById('list');
+    list.innerHTML=data.groups.map(groupHTML).join('')+
+      `<button class="add-group" id="add-group">${ICONS.plus} Dodaj grupę urządzeń</button>`;
+    wire();
+    refreshOwnerFilter();
+    applyFilter();
+    updateProgress();
+  }
+
+  function refreshOwnerFilter(){
+    const sel=document.getElementById('owner-filter');if(!sel)return;
+    const names=new Set();
+    data.groups.forEach(g=>g.tasks.forEach(t=>{if(t.owner&&t.owner.trim())names.add(t.owner.trim());}));
+    const sorted=[...names].sort((a,b)=>a.localeCompare(b,'pl'));
+    if(ownerFilter&&!names.has(ownerFilter)) ownerFilter='';
+    sel.innerHTML='<option value="">Wszystkie osoby</option>'
+      +sorted.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+    sel.value=ownerFilter;
+  }
+
+  function wire(){
+    const list=document.getElementById('list');
+
+    document.getElementById('add-group').onclick=()=>{
+      const g={id:uid(),name:'NOWA GRUPA',tasks:[]};data.groups.push(g);save();render();
+      // focus new group title
+      const el=[...document.querySelectorAll('.group')].pop().querySelector('.group-title');
+      el.focus();document.getSelection().selectAllChildren(el);
+    };
+
+    list.querySelectorAll('.group').forEach(gEl=>{
+      const gid=gEl.dataset.g;
+      const g=data.groups.find(x=>x.id===gid);
+      gEl.querySelector('.toggle-group').onclick=()=>{ui.collapsed[gid]=!ui.collapsed[gid];gEl.classList.toggle('collapsed');};
+      gEl.querySelector('.del-group').onclick=()=>{
+        if(confirm('Usunąć całą grupę „'+g.name+'” wraz z zadaniami?')){
+          data.groups=data.groups.filter(x=>x.id!==gid);save();render();
+        }
+      };
+      const title=gEl.querySelector('.group-title');
+      title.onblur=()=>{const v=title.textContent.trim()||'BEZ NAZWY';g.name=v;title.textContent=v;save();};
+      title.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();title.blur();}};
+
+      // add task
+      const addInput=gEl.querySelector('.add-task-input'),addBtn=gEl.querySelector('.add-task-btn');
+      const doAdd=()=>{const v=addInput.value.trim();if(!v)return;
+        g.tasks.push({id:uid(),text:v,owner:'',created:now(),done:false,doneBy:'',doneAt:'',note:'',noteBy:'',lastEdit:now()});
+        addInput.value='';save();render();};
+      addBtn.onclick=doAdd;
+      addInput.onkeydown=e=>{if(e.key==='Enter')doAdd();};
+    });
+
+    list.querySelectorAll('.task').forEach(el=>{
+      const id=el.dataset.id;const ft=findTask(id);if(!ft)return;const t=ft.t;
+
+      const chk=el.querySelector('.check');
+      const toggle=async()=>{
+        if(!t.done){
+          const res=await openCloseModal(t);
+          if(res===null) return;                 // anulowano lub zablokowane uwagami
+          const name=res.name;
+          t.done=true;t.doneBy=name||'—';t.doneAt=now();
+          if(name){data.currentUser=name;}
+        }else{
+          t.done=false;t.doneBy='';t.doneAt='';
+        }
+        t.lastEdit=now();save();render();
+      };
+      chk.onclick=toggle;
+      chk.onkeydown=e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();}};
+
+      const txt=el.querySelector('.task-text');
+      txt.onblur=()=>{const v=txt.textContent.trim();if(v&&v!==t.text){t.text=v;t.lastEdit=now();save();render();}else{txt.textContent=t.text;}};
+      txt.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();txt.blur();}};
+
+      const nt=el.querySelector('.note-toggle'),wrap=el.querySelector('.note-wrap');
+      nt.onclick=async()=>{
+        const opening=!ui.noteOpen[id];
+        // przy zakładaniu NOWEJ uwagi wymagaj podpisu imieniem
+        if(opening && !t.noteBy && !(t.note&&t.note.trim())){
+          const res=await openNoteModal(t);
+          if(res===null) return;                 // anulowano — nie otwieramy pola
+          t.noteBy=res.name; if(res.name) data.currentUser=res.name;
+          t.lastEdit=now(); save();
+        }
+        ui.noteOpen[id]=!ui.noteOpen[id];
+        wrap.classList.toggle('open',ui.noteOpen[id]);
+        if(ui.noteOpen[id]) el.querySelector('textarea').focus();
+      };
+
+      const ta=el.querySelector('textarea');
+      ta.oninput=()=>{
+        t.note=ta.value;t.lastEdit=now();
+        if(t.note.trim()){ if(!t.noteBy) t.noteBy=data.currentUser||'—'; }
+        else { t.noteBy=''; }                    // pusta uwaga = bez podpisu (następnym razem znów zapyta)
+        nt.classList.toggle('has-note',!!t.note.trim());
+        nt.querySelector('span').textContent=t.note.trim()?'Uwaga / raport':'Dodaj uwagę / raport';
+        const st=taskState(t);                       // uwaga => pomarańczowy na żywo (jeśli niezamknięte)
+        el.classList.remove('st-green','st-orange','st-red');el.classList.add('st-'+st);
+        save();
+      };
+
+      el.querySelector('.del-task').onclick=()=>{
+        if(confirm('Usunąć to zadanie?')){ft.g.tasks=ft.g.tasks.filter(x=>x.id!==id);save();render();}
+      };
+
+      const ownerLabel=el.querySelector('.owner'),ownerInput=el.querySelector('.owner-input');
+      ownerInput.oninput=()=>{
+        t.owner=ownerInput.value;t.lastEdit=now();
+        ownerLabel.classList.toggle('assigned',!!t.owner.trim());
+        save();
+      };
+      ownerInput.onblur=()=>{t.owner=ownerInput.value.trim();ownerInput.value=t.owner;refreshOwnerFilter();};
+    });
+  }
+
+  function updateProgress(){
+    const {d,a}=totals();const pct=a?Math.round(d/a*100):0;
+    document.getElementById('pct').textContent=pct+'%';
+    document.getElementById('count').textContent=d+' / '+a+' zadań';
+    document.getElementById('foot-count').textContent=data.groups.length+' grup, '+a+' zadań';
+    const bar=document.getElementById('bar');bar.querySelector('span').style.width=pct+'%';
+    bar.classList.toggle('full',pct===100&&a>0);
+  }
+
+  function applyFilter(){
+    document.querySelectorAll('.group').forEach(gEl=>{
+      let any=false;
+      gEl.querySelectorAll('.task').forEach(el=>{
+        const ft=findTask(el.dataset.id);if(!ft){el.classList.add('t-hidden');return;}
+        const t=ft.t;let ok=true;
+        if(filter==='todo'&&t.done)ok=false;
+        if(filter==='done'&&!t.done)ok=false;
+        if(ownerFilter&&(t.owner||'').trim()!==ownerFilter)ok=false;
+        if(query){const hay=(ft.g.name+' '+t.text+' '+(t.note||'')+' '+(t.doneBy||'')+' '+(t.owner||'')).toLowerCase();if(!hay.includes(query))ok=false;}
+        el.classList.toggle('t-hidden',!ok);if(ok)any=true;
+      });
+      const isQueryOrFilter=(filter!=='all'||query||ownerFilter);
+      gEl.classList.toggle('hidden',isQueryOrFilter&&!any);
+    });
+  }
+
+  function exportTxt(){
+    const {d,a}=totals();
+    let o='SERWIS MULTIMEDIA BAVM 2026\n';
+    o+='Raport: '+now()+'   |   Postęp: '+d+'/'+a+' ('+(a?Math.round(d/a*100):0)+'%)\n'+'='.repeat(64)+'\n\n';
+    data.groups.forEach((g,i)=>{
+      o+=(i+1)+'. '+g.name+'\n';
+      g.tasks.forEach(t=>{
+        o+='  ['+(t.done?'X':' ')+'] '+t.text+'\n';
+        if(t.owner&&t.owner.trim())o+='       odpowiedzialny: '+t.owner.trim()+'\n';
+        o+='       wpłynęło: '+(t.created||'—')+'\n';
+        if(t.done)o+='       zakończono: '+(t.doneAt||'—')+' · zamknął: '+(t.doneBy||'—')+((t.note&&t.note.trim())?' (mimo uwag)':'')+'\n';
+        if(t.note&&t.note.trim())o+='       uwaga ('+(t.noteBy||'—')+'): '+t.note.trim().replace(/\n/g,'\n              ')+'\n';
+      });
+      o+='\n';
+    });
+    dl(o,'text/plain','raport_serwis_lato_2026.txt');
+  }
+  function exportCsv(){
+    const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+    const statusLabel=t=>t.done?((t.note&&t.note.trim())?'ZAMKNIĘTE MIMO UWAG':'ZAMKNIĘTE'):((t.note&&t.note.trim())?'UWAGI (zablokowane)':'DO ZROBIENIA');
+    let rows=[['Grupa','Zadanie','Odpowiedzialny','Status','Data wpłynięcia','Zamknął','Data zakończenia','Uwaga','Autor uwagi','Ostatni wpis']];
+    data.groups.forEach(g=>g.tasks.forEach(t=>rows.push([
+      g.name,t.text,t.owner||'',statusLabel(t),t.created||'',t.doneBy||'',t.doneAt||'',(t.note||'').replace(/\n/g,' '),t.noteBy||'',t.lastEdit||''
+    ])));
+    dl('\ufeff'+rows.map(r=>r.map(q).join(';')).join('\n'),'text/csv','raport_serwis_lato_2026.csv');
+  }
+  function dl(content,type,name){
+    const blob=new Blob([content],{type:type+';charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);
+  }
+
+  async function resetAll(){
+    if(!confirm('Przywrócić oryginalną listę serwisową? Wszystkie zmiany, zaznaczenia i uwagi zostaną skasowane.'))return;
+    seed();ui.collapsed={};ui.noteOpen={};await save();render();
+  }
+
+  (async function(){
+    initStorage();
+    await load();
+    buildStatic();
+    render();
+    updateConnPill();
+    startSync();
+  })();
+})();
+</script>
